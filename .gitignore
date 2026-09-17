@@ -1,15 +1,19 @@
-build/
-install/
-log/
-tmp/
-/runs/
-.DS_Store
-CLAUDE.md
-.codex
-*.png
-.claude/
-
-# Python bytecode caches (compiled output; never source)
+/build/
+/install/
+/log/
+/CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+*.mcap
+*.db3
+*.pcd
 __pycache__/
 *.py[cod]
-*.egg-info/
+
+# Local development artifacts are not part of the deployable package.
+MIGRATION.md
+docs/
+tools/
+.gitmodules
+/test/
+/src/localization/

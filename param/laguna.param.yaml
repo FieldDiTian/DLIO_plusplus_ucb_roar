@@ -1,0 +1,196 @@
+/**:
+  ros__parameters:
+    # Production Laguna profile. Parameters in this file are loaded after and
+    # therefore override same-name defaults from gicp_interface.param.yaml.
+
+    # Coordinate and sensor contract: every product pose is map -> cg.
+    # VKS local ENU datum used for NavSatFix conversion. The explicit datum
+    # takes precedence over an optional map sidecar; it does not move the map.
+    localization/require_map_manifest: false
+    localization/expected_enu_origin: "36.5869133,-121.7559026,231.9349051"
+    localization/map_frame: "map"
+    localization/base_frame: "cg"
+    localization/imu_frame: "cg"
+    localization/lidar_frame: "luminar_front"
+    localization/sensor_type: "luminar"
+    # One callback-executor thread plus the separate ordered scan worker keeps
+    # the vehicle's one-core budget bounded; do not inherit host CPU count.
+    localization/executor_threads: 1
+
+    # Calibrated CG <- front-LiDAR transform. Row-major 4x4 matrix.
+    localization/base_lidar_transform: [
+       0.9991339272,  0.0302902669,  0.0285288507, 0.7021616195,
+      -0.0300762661,  0.9995163810, -0.0079007759, 0.0736472845,
+      -0.0287543702,  0.0070358919,  0.9995617452, 0.3710007381,
+       0.0,           0.0,           0.0,          1.0
+    ]
+    localization/base_lidar_transform_frame: "luminar_front"
+
+    # Map and VKS reference coordinates share the native local ENU datum.
+    ins_offset: [0.0, 0.0, 0.0]
+
+    # /vks/imu is race_common's calibrated, CG-referenced fused IMU. Skip the
+    # legacy stationary-bias learner and retain zero residual biases.
+    localization/imu/precalibrated: true
+    localization/imu/require_topic_allowlist: true
+    localization/imu/topic_allowlist: ["/vks/imu"]
+    localization/imu/require_frame_match: true
+    enable_deskew: true
+    imu_buffer_size: 2000
+    localization/deskew/future_imu_wait_timeout_s: 1.0
+    localization/deskew/trajectory_knot_interval_s: 0.002
+
+    # VKS position is used only to initialize and recover after three rejected
+    # registrations. It is not blended into healthy GICP solutions.
+    localization/use_odom_init: true
+    localization/gt_odom/enable: true
+    localization/gt_odom/expected_frame_id: "map"
+    localization/gt_odom/expected_child_frame_id: "cg"
+    localization/gt_odom/buffer_size: 2500
+    localization/gt_odom/max_dt: 0.10
+    localization/gt_odom/interp_max_gap: 0.50
+    localization/rtk_gate/enable: true
+    localization/rtk_gate/allow_zero_covariance: false
+    localization/rtk_gate/max_pose_var_xy: 0.25
+    localization/rtk_gate/max_pose_var_z: 1.0
+    localization/gt_recovery/enable: true
+    localization/gt_recovery/min_consecutive_failures: 3
+    localization/rtk_init/enable: false
+    localization/ins_prior/enable: false
+    localization/ins_prior/gicp_position_seed_blend: 0.0
+
+    # VKS IMU orientation supplies a bounded yaw seed only; no VKS position is
+    # read by this prior.
+    localization/imu_heading_prior/enable: true
+    localization/imu_heading_prior/yaw_blend: 1.0
+    localization/imu_heading_prior/max_yaw_step_deg: 2.0
+    localization/imu_heading_prior/sanity_max_yaw_deg: 30.0
+    localization/imu_heading_prior/max_yaw_sigma_deg: 3.0
+    localization/imu_heading_prior/max_time_error_s: 0.02
+
+    # Front-only compute profile. The point budget bounds per-scan work;
+    # accepted scans publish, while quality rejects and queue drops do not.
+    localization/map_voxel_size: 0.25
+    localization/local_map/enabled: false
+    localization/registration_rate_hz: 0.0
+    scan_crop_size: 140.0
+    scan_min_range: 3.0
+    scan_max_range: 140.0
+    scan_downsample_enabled: true
+    scan_downsample: 0.75
+    scan_max_points: 5000
+    scan_point_budget/spatial_balancing: true
+    scan_point_budget/azimuth_bins: 36
+    scan_point_budget/range_bins: 3
+
+    # Both front-only and iris_interface inputs use the node's fixed
+    # SensorDataQoS contract: BEST_EFFORT, VOLATILE, keep-last(5).
+    localization/lidar_concat/enabled: false
+    localization/lidar_concat/aux_topics: ["/luminar_right/points", "/luminar_left/points"]
+    localization/lidar_concat/aux_frames: ["luminar_right", "luminar_left"]
+    localization/lidar_concat/time_threshold: 0.1
+    localization/lidar_concat/luminar_point_time_threshold_s: 0.010
+    localization/lidar_concat/future_aux_wait_timeout_s: 0.150
+    # Front-only GICP has a single worker. Keep a bounded 0.8 s burst buffer
+    # so one >100 ms registration does not immediately discard the next 10 Hz
+    # scan and cascade into an IMU-gap recovery. This is queue capacity, not a
+    # registration-rate limiter. If full, the queue drops its oldest scan.
+    localization/lidar_concat/primary_queue_size: 8
+    localization/lidar_concat/buffer_size: 200
+    localization/lidar_concat/float64_time_is_epoch_ns: false
+    localization/lidar_concat/float64_time_fail_on_mismatch: true
+    localization/lidar_concat/require_all_aux: false
+    # PAUSED CAPABILITY: these auxiliary inputs and strictness controls are
+    # retained only for lidar_concat_source:=gicp_internal_paused. They are not
+    # applied to the active iris_interface external-concat path.
+    localization/lidar_concat/abort_on_merge_failure: false
+    localization/lidar_concat/max_consecutive_aux_merge_failures: 10
+    localization/lidar_concat/primary_frame: "luminar_front"
+    localization/lidar_concat/urdf_path: ""
+
+    # Static auxiliary extrinsics used by the selected native-Z full run,
+    # embedded as
+    # T(luminar_front <- auxiliary) so vehicle deployment does not depend on
+    # an external URDF. Order matches aux_frames.
+    localization/lidar_concat/aux_static_transforms: [
+      # luminar_right
+      -0.38268342,  0.92387954, 0.0, -0.648,
+      -0.92387954, -0.38268342, 0.0, -0.158,
+       0.0,         0.0,        1.0,  0.087,
+       0.0,         0.0,        0.0,  1.0,
+      # luminar_left
+      -0.38268342, -0.92387954, 0.0, -0.658,
+       0.92387954, -0.38268342, 0.0,  0.144,
+       0.0,         0.0,        1.0,  0.087,
+       0.0,         0.0,        0.0,  1.0
+    ]
+
+    # Deployment is constrained to one CPU core. Keep the backend and OpenMP
+    # budget single-threaded. Actual throughput depends on the full pipeline.
+    gicp/numThreads: 1
+    # Front-only Aug24 one-core benchmark: bound both normal and startup
+    # solves identically so startup cannot create a separate burst profile.
+    gicp/maxIterations: 6
+    gicp/maxInnerIterations: 5
+    gicp/startupMaxIterations: 6
+    gicp/maxOptimizationTimeMsCooperative: 100.0
+    gicp/startupMaxOptimizationTimeMsCooperative: 100.0
+    gicp/startupAcceptedScans: 10
+    gicp/finalizationReserveMs: 30.0
+    gicp/hardResultMaxAgeMs: 1000.0
+    gicp/correspondenceRandomness: 10
+    gicp/maxCorrespondenceDistance: 1.0
+    gicp/transformationEpsilon: 0.01
+    gicp/rotationEpsilon: 0.004363323
+
+    # Ground-vehicle optimizer and quality gates. The 0.50 support ratio is
+    # the primary LiDAR-only wrong-basin gate; VKS is not consulted here.
+    gicp/dof/mode: "4dof"
+    gicp/dof/full6dofEveryN: 10
+    gicp/dof/planarWarmupAcceptedScans: 1
+    gicp/fitnessRejectThreshold: 1000000000.0
+    gicp/nonConvergedFitnessOkMaxTransM: 3.0
+    gicp/nonConvergedFitnessOkMaxRotDeg: 0.0
+    gicp/minCorrespondences: 0
+    gicp/minCorrespondenceRatio: 0.50
+    gicp/fitnessBaseline/enable: false
+    gicp/fitnessRatioRejectThreshold: 0.0
+    gicp/rejectLargeJumps: true
+    gicp/degeneracy/partialUpdate: true
+    gicp/degeneracy/full6d: true
+    gicp/degeneracy/couplingLengthM: 20.0
+    gicp/degeneracy/relFloor6d: 0.02
+    gicp/yawGate/enable: true
+    gicp/yawGate/maxCorrDeg: 1.5
+    gicp/yawGate/fitnessRatio: 1.2
+    gicp/yawGate/hardMaxCorrDeg: 8.0
+    gicp/rpGate/hardMaxCorrDeg: 3.0
+    localization/jump/vertical_m: 10.0
+
+    # Observer and accepted-output behavior.
+    odom/geo/Kp: 4.5
+    odom/geo/Kv: 11.25
+    odom/geo/Kq: 4.0
+    odom/geo/Kab: 0.0
+    odom/geo/Kgb: 0.0
+    odom/geo/Kz_damping: 0.0
+    odom/geo/abias_max: 0.3
+    odom/geo/gbias_max: 0.05
+    odom/geo/observer_dt_max: 0.15
+    odom/geo/max_pos_correction: 2.0
+    odom/geo/max_vel_correction: 5.0
+    odom/geo/max_state_speed: 100.0
+    vel_feedback_gain: 0.8
+    localization/output/max_imu_delay_compensation_s: 0.5
+
+    # Wheel speed supplies scalar body-x motion only.
+    localization/wheel_speed/topic: "/vks/wheels"
+    localization/wheel_speed/feedback_gain: 0.5
+    localization/wheel_speed/max_age_s: 0.3
+    localization/wheel_speed/stationary_gate/enable: true
+    localization/wheel_speed/stationary_gate/enter_speed_mps: 0.2
+    localization/wheel_speed/stationary_gate/exit_speed_mps: 0.5
+
+    localization/debug/verbose_scan_log: false
+    localization/debug/enable_jump_log: false
+    localization/verbose: false
