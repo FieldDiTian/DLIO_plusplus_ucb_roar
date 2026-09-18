@@ -145,6 +145,35 @@ python3 scripts/export_glim_dump_to_pcd.py \
 and coordinate requirements. Mapping and online localization share the input
 coordinate contract but have separate estimator configurations.
 
+## Laguna real-data validation
+
+The combined workspace was rebuilt and tested with the existing Jul26 run1
+Laguna bag, offsets 223–403 seconds, using direct GLIM processing and direct
+1x GICP replay. The exported ENU map contains 36.4 million points. For this
+validated VKS stream, use the gravity constraint documented in the
+[GLIM mapping guide](GLIM/README.md): position anchors alone allowed map roll
+to drift despite close position agreement.
+
+The desktop's default Fast DDS transport lost large front-cloud messages even
+with GICP stopped (19 of 200 delivered in a separate 20-second check).
+The already-installed Cyclone DDS delivered all 200 in the same check.
+For this desktop replay, select it for both the localizer and bag-player
+processes with `RMW_IMPLEMENTATION=rmw_cyclonedds_cpp`. This is a test-process
+setting; the vehicle configuration and dependency environment remain unchanged.
+Do not infer replay delivery from node startup or worker drop counters alone.
+
+With the gravity-constrained map and Cyclone DDS, the full 180-second replay
+received 1,796 of 1,800 front scans and published 1,796 paired Odometry/NavSatFix
+outputs (9.98 Hz), with no logged registration rejects or internal scan drops.
+The maximum output interval was 0.305 s. Horizontal difference from VKS was
+0.284 m median, 3.853 m p95, and 4.197 m maximum, including a stationary
+interval offset. This confirms bounded real-data operation, but does **not**
+clear localization accuracy or the unresolved default Fast DDS delivery loss.
+
+This bounded same-window test is not independent localization accuracy or a
+repeat of vehicle validation: the map uses VKS constraints and GICP retains
+VKS initialization/recovery.
+
 ## Migration notes
 
 - Build/run `gicp_interface`, not the removed `gicp_localization` or `adapter`.

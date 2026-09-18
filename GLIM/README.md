@@ -54,6 +54,16 @@ The generated GNSS extension consumes the Odometry directly, so no separate
 RTK-filtered bag or normalization node is required. Its covariance weighting,
 alignment-quality checks, and mapping health gates remain in the generator.
 
+For the validated Laguna VKS stream, add
+`--gnss-gravity-prior-sigma-deg 0.5` to the generator command. This uses the
+INS body-Z direction to constrain map roll/pitch while leaving yaw to the
+existing mapping constraints. Position anchors alone can closely match VKS
+positions while allowing the map to tilt: in the Jul26 run1 223–403 s replay,
+the unconstrained map reached about 8 degrees of roll difference. The gravity
+constraint reduced the 95th-percentile roll difference to 0.018 degrees.
+Keep this option disabled for odometry sources without a valid, calibrated
+INS attitude; a position-only quaternion is insufficient.
+
 The checked-in older `glim/config` examples retain their historical Atlas
 settings. Use the generated directory above for the VKS setup rather than
 editing installed configuration files. Run the generator with `--help` for
