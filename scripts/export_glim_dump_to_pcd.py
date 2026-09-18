@@ -31,7 +31,7 @@ from typing import Iterable, Optional
 import numpy as np
 
 
-# [P2 FIX 2026-07-14] ENU datum single source of truth. prep_bag writes the
+# [P2 FIX 2026-07-14] ENU datum single source of truth. A mapping run may record the
 # resolved origin into the dump dir as enu_origin.txt; the exporter reads it as
 # the default and CANONICALIZES it so the manifest carries a fixed-precision
 # form (GICP then compares numerically with tolerance, not by raw string). This
@@ -295,7 +295,7 @@ def main() -> int:
         parser.error("--voxel-size must be finite and >= 0")
 
     # [P2 FIX 2026-07-14] Single source of truth: default the ENU origin from the
-    # datum prep_bag recorded in the dump (<dump_dir>/enu_origin.txt) when the
+    # datum recorded in the dump (<dump_dir>/enu_origin.txt) when the
     # operator did not pass one explicitly. Then parse/canonicalize whatever we
     # have so the manifest carries a validated fixed-precision datum.
     if args.frame == "enu" and not args.enu_origin:
@@ -318,10 +318,10 @@ def main() -> int:
         args.gnss_enu_origin = args.enu_origin
 
     # [P3 FIX 2026-07-10] Provenance is ENFORCED, not just recorded: an ENU
-    # map without its datum cannot be validated against the live adapter.
+    # map without its datum cannot be validated against the VKS input.
     if args.frame == "enu" and not args.enu_origin and not args.allow_missing_origin:
         parser.error(
-            "--frame enu requires --enu-origin 'lat_deg,lon_deg,alt_m' (the adapter/prep_bag "
+            "--frame enu requires --enu-origin 'lat_deg,lon_deg,alt_m' (the mapping input "
             "datum for this dataset). Use --allow-missing-origin ONLY for legacy dumps whose "
             "origin is unrecoverable."
         )
@@ -426,8 +426,8 @@ def main() -> int:
                 mh.write(f"enu_origin: {args.enu_origin}  # output map datum\n")
                 mh.write(f"gnss_enu_origin: {args.gnss_enu_origin}  # mapping input datum\n")
             else:
-                mh.write("enu_origin: UNSPECIFIED  # WARNING: record the adapter's\n")
-                mh.write("#   local_enu_origin for this dataset — a live adapter with a\n")
+                mh.write("enu_origin: UNSPECIFIED  # WARNING: record the input's\n")
+                mh.write("#   ENU origin for this dataset — a VKS input with a\n")
                 mh.write("#   different datum is silently incompatible with this map\n")
             if pre_transform is not None:
                 mh.write(

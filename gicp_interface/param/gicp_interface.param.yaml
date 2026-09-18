@@ -1,0 +1,107 @@
+/**:
+  ros__parameters:
+    # Generic, track-independent safety defaults.
+    #
+    # This file is loaded first by localize.launch.py. It deliberately contains
+    # no map, vehicle extrinsic, GNSS receiver, initial pose, track geometry, or
+    # performance tuning. A deployment profile must provide those facts.
+    use_sim_time: false
+
+    # rclcpp callback executor workers; 0 preserves rclcpp's automatic
+    # hardware-concurrency choice. CPU-constrained vehicle profiles should set
+    # this explicitly; the GICP scan pipeline owns a separate worker.
+    localization/executor_threads: 0
+
+    # Map and frame contract. map_path is mandatory at launch time.
+    localization/map_path: ""
+    localization/require_map_manifest: false
+    localization/expected_enu_origin: ""
+    localization/map_frame: "map"
+    localization/base_frame: "base_link"
+    localization/imu_frame: "imu"
+    localization/lidar_frame: "lidar"
+    localization/base_lidar_transform: []
+    # Frame whose coordinates the static base_lidar_transform consumes. Empty
+    # preserves legacy behavior by using localization/lidar_frame.
+    localization/base_lidar_transform_frame: ""
+    localization/map_rotation/roll_deg: 0.0
+    localization/map_rotation/pitch_deg: 0.0
+    localization/map_rotation/yaw_deg: 0.0
+
+    # Product topics are fixed in the node: /localization/gicp/odom and
+    # /localization/gicp/navsatfix. NavSatFix is always advertised; configure
+    # expected_enu_origin (lat_deg,lon_deg,alt_m) for STATUS_FIX.
+    localization/map_voxel_size: 0.30
+    localization/local_map/enabled: false
+
+    # Generic input behavior. The base layer is source-neutral; vehicle
+    # profiles may enable an exact topic allowlist and frame contract.
+    localization/sensor_type: "luminar"
+    localization/imu_only: false
+    localization/imu/precalibrated: false
+    localization/imu/require_topic_allowlist: false
+    localization/imu/topic_allowlist: []
+    localization/imu/require_frame_match: true
+    imu_calibration_time: 3.0
+    imu_buffer_size: 2000
+    gravity: 9.81
+    enable_deskew: true
+    localization/deskew/future_imu_wait_timeout_s: 1.0
+    localization/deskew/trajectory_knot_interval_s: 0.002
+
+    # No external pose source is assumed by the reusable base configuration.
+    localization/use_odom_init: false
+    localization/gt_odom/enable: false
+    localization/gt_recovery/enable: false
+    localization/ins_prior/enable: false
+    localization/imu_heading_prior/enable: false
+    localization/rtk_init/enable: false
+    localization/initial_pose/use: false
+    localization/initial_pose/frame: "base_link"
+    localization/initial_pose/x: 0.0
+    localization/initial_pose/y: 0.0
+    localization/initial_pose/z: 0.0
+    localization/initial_pose/roll: 0.0
+    localization/initial_pose/pitch: 0.0
+    localization/initial_pose/yaw: 0.0
+    ins_offset: [0.0, 0.0, 0.0]
+
+    # Front-only, unbounded-rate generic processing. Deployment overlays own
+    # tested rate, point-budget, optimizer-deadline, and recovery values.
+    localization/lidar_concat/enabled: false
+    # LiDAR subscriptions use fixed rclcpp::SensorDataQoS: BEST_EFFORT,
+    # VOLATILE, keep-last(5). No QoS parameters are exposed.
+    localization/lidar_concat/require_all_aux: false
+    localization/registration_rate_hz: 0.0
+    scan_crop_size: 80.0
+    scan_min_range: 0.0
+    scan_max_range: 0.0
+    scan_downsample_enabled: true
+    scan_downsample: 0.30
+    scan_max_points: 0
+
+    # Optional constraints and proprioceptive aids are deployment-owned.
+    localization/track_constraint/enable: false
+    localization/track_tuning/enable: false
+    localization/track_tuning/rde_telemetry_topic: "/rde/telemetry"
+    # Empty schedules use the C++ declaration defaults. YAML empty sequences
+    # are rejected by rclcpp as an unset parameter; provide these arrays only
+    # in a deployment overlay when track-time tuning is enabled.
+    localization/wheel_speed/topic: ""
+    localization/wheel_speed/stationary_gate/enable: false
+    localization/output/wheel_distance_anchor/enable: false
+    localization/output/motion_gate/enable: false
+    localization/output/max_imu_delay_compensation_s: 0.5
+
+    # Conservative observer defaults retained from the validated ground-vehicle
+    # implementation. Online bias adaptation remains disabled.
+    odom/geo/Kz_damping: 0.0
+    odom/geo/Kab: 0.0
+    odom/geo/Kgb: 0.0
+    odom/geo/abias_max: 0.3
+    odom/geo/gbias_max: 0.05
+
+    # Logging is opt-in outside a deployment profile.
+    localization/verbose: false
+    localization/debug/verbose_scan_log: false
+    localization/debug/enable_jump_log: false

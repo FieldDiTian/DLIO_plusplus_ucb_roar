@@ -4,7 +4,7 @@
 The profile is dataset-independent. Dataset-specific values are injected only
 through CLI arguments:
 
-* IMU/GNSS/point topics describe the prepared bag contract.
+* IMU/GNSS/point topics describe the input bag contract.
 * ``--t-lidar-imu`` supplies the calibration for that bag's body-frame IMU.
 * ``--imu-input-rotation`` optionally corrects incoming IMU vectors that still
   contain a measured receiver-mount tilt.
@@ -487,15 +487,15 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output-dir", required=True, type=Path)
     parser.add_argument("--offload-dir", required=True, type=Path)
-    parser.add_argument("--imu-topic", required=True)
-    parser.add_argument("--gnss-topic", default="/gnss")
+    parser.add_argument("--imu-topic", default="/vks/imu")
+    parser.add_argument("--gnss-topic", default="/vks/filtered_odom")
     parser.add_argument(
         "--gnss-msg-type",
         choices=[
             "geometry_msgs/msg/PoseWithCovarianceStamped",
             "nav_msgs/msg/Odometry",
         ],
-        default="geometry_msgs/msg/PoseWithCovarianceStamped",
+        default="nav_msgs/msg/Odometry",
     )
     parser.add_argument(
         "--gnss-min-baseline",
@@ -529,7 +529,7 @@ def parse_args() -> argparse.Namespace:
         metavar=("QX", "QY", "QZ", "QW"),
         help="Fixed quaternion rotating incoming acceleration/gyro vectors into the "
         "calibrated IMU frame used by --t-lidar-imu. Keep identity when the "
-        "prepared topic is already fully body-frame calibrated.",
+        "input topic is already fully body-frame calibrated.",
     )
     parser.add_argument("--urdf-path", type=Path)
     parser.add_argument(

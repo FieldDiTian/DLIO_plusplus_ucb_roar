@@ -87,7 +87,7 @@
     // Topics
     // Atlas FusionEngine imu_calibrated: sensor-level bias/scale/misalignment
     // removed by P1 firmware, gravity present, no fused orientation, 99 Hz.
-    // See gicp_localization/cfg/localization.yaml for the rationale.
+    // See the sensor-source configuration for the rationale.
     "imu_topic": "/gps_p1/imu",
     "points_topic": "/luminar_front/points",
     "image_topic": "/image",

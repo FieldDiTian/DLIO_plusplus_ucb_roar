@@ -1,3 +1,19 @@
+# Current workspace setup
+
+The current vehicle localizer is `gicp_interface`, imported from the ART
+standalone package. Preserve its VKS inputs, `map -> cg` output contract,
+BEST_EFFORT QoS, external small_gicp/race_msgs dependencies, and Laguna profile.
+Use its README and source for current behavior. `gicp_localization`, `adapter`,
+and the adapter-dependent `scripts/prep_bag.py` have been removed. Replay
+existing bags directly; GLIM also reads them directly with `glim_rosbag`.
+
+The notes below predate this migration. Entries naming the removed localizer,
+Atlas adapter, or old source line numbers are historical, not instructions for
+the current GICP package. GLIM-specific mathematical notes still apply to the
+retained GLIM implementation and should be verified against its current source.
+
+---
+
 # AGENTS.md — Notes for AI reviewers
 
 This file documents patterns in DLIO++ that **look** like bugs but aren't,

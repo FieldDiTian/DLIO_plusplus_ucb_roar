@@ -9,8 +9,9 @@
   <author email="logankm@berkeley.edu">Logan Kinajil-Moran</author>
   <license>LGPLv3</license>
 
-  <depend>adapter</depend>
-  <depend>gicp_localization</depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>gicp_interface</depend>
   <depend>glim</depend>
   <depend>glim_ext</depend>
   <depend>glim_ros</depend>

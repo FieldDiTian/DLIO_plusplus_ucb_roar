@@ -15,7 +15,7 @@
     // configs (commented) only for odometry-only smoke runs or if mapping
     // CPU/memory becomes a problem. After the first dense-map rebuild,
     // re-baseline the GICP fitness floor with
-    // gicp_localization/scripts/analyze_scan_debug_log.py — the P1 ratio
+    // the selected localizer's scan diagnostics — the P1 ratio
     // thresholds depend on it.
     "config_preprocess": "config_preprocess_dense_map.json",
     // "config_preprocess": "config_preprocess.json",  // legacy sparse (odometry-only runs)
@@ -27,7 +27,7 @@
     //     graph whenever a usable RTK-FIXED sample arrives. During GNSS-denied
     //     passages the GNSS factor stream goes silent and LiDAR+IMU odometry
     //     alone drives the trajectory until RTK reacquires.
-    //   * Pre-filter (gicp_localization/scripts/rtk_fixed_odom_filter.py)
+    //   * Pre-filter (an external covariance-qualified odometry source (historical profile))
     //     gates the GNSS topic to RTK-FIXED quality only, so degraded fixes
     //     never poison the global graph.
     // The old config_odometry_ins.json path (INS-driven, GLIM PAUSES on RTK

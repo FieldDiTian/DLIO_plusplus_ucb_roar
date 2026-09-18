@@ -1,7 +1,7 @@
 {
   "gnss": {
     // RTK-FIXED-only filtered stream from
-    // gicp_localization/scripts/rtk_fixed_odom_filter.py. Each message that
+    // an external covariance-qualified odometry source (historical profile). Each message that
     // lands here turns into a GNSS-position factor on the corresponding
     // pose in the global iSAM2 graph. During GNSS-denied passages the
     // filter stops forwarding -- no factors are added -- and the LiDAR+IMU

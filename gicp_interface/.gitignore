@@ -1,0 +1,19 @@
+/build/
+/install/
+/log/
+/CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+*.mcap
+*.db3
+*.pcd
+__pycache__/
+*.py[cod]
+
+# Local development artifacts are not part of the deployable package.
+MIGRATION.md
+docs/
+tools/
+.gitmodules
+/test/
+/src/localization/

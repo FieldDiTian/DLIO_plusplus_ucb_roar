@@ -1,3 +1,8 @@
+> This is the retained experimental `gicp_plusplus` package. The current
+> vehicle setup is documented in [gicp_interface](../gicp_interface/README.md).
+> Atlas/adapter and old localizer references below describe historical runs;
+> the adapter and bag-preparation workflow are no longer provided.
+
 # GICP++ Localization
 
 Parallel small_gicp-backed scan-to-map localization with IMU dead-reckoning and
